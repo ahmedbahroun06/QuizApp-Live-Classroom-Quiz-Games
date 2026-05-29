@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: quiz-app
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
+
+databases:
+  - name: quiz-app-db
+    engine: mysql
+    version: "8"
+    plan: free

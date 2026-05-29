@@ -1,0 +1,8 @@
+db_data
+vendor
+*.log
+*.cache
+.DS_Store
+.git
+.gitignore
+node_modules

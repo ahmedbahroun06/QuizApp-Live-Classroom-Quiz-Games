@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - '8000:80'
+    volumes:
+      - .:/var/www/html:cached
+    environment:
+      DB_HOST: db
+      DB_NAME: quiz_app
+      DB_USER: root
+      DB_PASS: ''
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: quiz_app
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database.sql:/docker-entrypoint-initdb.d/database.sql:ro
+
+volumes:
+  db_data:
