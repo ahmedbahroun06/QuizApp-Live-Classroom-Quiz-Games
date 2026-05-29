@@ -5,7 +5,7 @@ Teachers create quizzes and generate game PINs. Students join instantly with no 
 
 ## Live Demo
 
-[Open QuizApp](https://6e7326d2d047c8.lhr.life)
+Permanent deployment URL will be added after the Render deployment is created.
 
 ## Features
 
