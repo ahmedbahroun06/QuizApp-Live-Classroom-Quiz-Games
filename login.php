@@ -2,13 +2,6 @@
 session_start();
 require 'config.php';
 
-if (isset($_SESSION['user_id'])) {
-    if ($_SESSION['role'] === 'teacher') {
-        header("Location: dashboard.php");
-        exit;
-    }
-}
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
@@ -22,18 +15,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
-
-            if ($user['role'] == 'teacher') {
-                header("Location: dashboard.php");
-            } else {
-                header("Location: index.html"); // Students just play with PIN from index
-            }
+            header("Location: dashboard.php");
             exit;
         } else {
-            $error = "Invalid username or password.";
+            $error = "Invalid credentials.";
         }
-    } else {
-        $error = "Please fill in all fields.";
     }
 }
 ?>
@@ -46,17 +32,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="auth-card">
-        <h2>Login</h2>
-        <?php if(isset($_SESSION['success'])) { echo "<p style='color:green;text-align:center;'>".$_SESSION['success']."</p>"; unset($_SESSION['success']); } ?>
-        <?php if(isset($error)) echo "<p class='error-text'>$error</p>"; ?>
-        <form action="login.php" method="POST">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit" class="btn btn-block btn-green">Login</button>
-        </form>
-        <p class="text-center mt-20"><a href="register.php">Don't have an account? Register</a></p>
-        <p class="text-center mt-20"><a href="index.html">Back to Home</a></p>
+    <div class="hero-section">
+        <div class="glass-card join-form-card">
+            <h2 style="text-align: center; margin-bottom: 30px; font-size: 2rem;">Welcome Back</h2>
+            <?php if(isset($_SESSION['success'])) { echo "<p style='color:var(--success);text-align:center;'>".$_SESSION['success']."</p>"; unset($_SESSION['success']); } ?>
+            <?php if(isset($error)) echo "<p class='error-text'>$error</p>"; ?>
+            <form action="login.php" method="POST">
+                <div class="form-group">
+                    <input type="text" name="username" class="form-control" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-accent btn-block" style="width: 100%;">Sign In</button>
+            </form>
+            <p style="text-align: center; margin-top: 25px; color: var(--text-dim);">New here? <a href="register.php" style="color: var(--accent); text-decoration: none; font-weight: 700;">Create account</a></p>
+            <p style="text-align: center; margin-top: 10px;"><a href="index.php" style="color: white; opacity: 0.6; text-decoration: none; font-size: 0.8rem;">← Back to Home</a></p>
+        </div>
     </div>
 </body>
 </html>

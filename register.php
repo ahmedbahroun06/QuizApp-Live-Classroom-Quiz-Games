@@ -5,27 +5,19 @@ require 'config.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
-    $role = $_POST['role']; // 'teacher' or 'student'
+    $role = $_POST['role'];
 
-    if (!empty($username) && !empty($password) && in_array($role, ['teacher', 'student'])) {
+    if (!empty($username) && !empty($password)) {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        
         try {
             $stmt = $pdo->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)");
             $stmt->execute([$username, $hashed_password, $role]);
-            
-            $_SESSION['success'] = "Registration successful! Please login.";
+            $_SESSION['success'] = "Account created! You can now login.";
             header("Location: login.php");
             exit;
         } catch (\PDOException $e) {
-            if ($e->getCode() == 23000) { // Integrity constraint violation
-                $error = "Username already exists.";
-            } else {
-                $error = "An error occurred. Please try again.";
-            }
+            $error = "Username already taken.";
         }
-    } else {
-        $error = "Please fill in all fields correctly.";
     }
 }
 ?>
@@ -38,20 +30,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="auth-card">
-        <h2>Register</h2>
-        <?php if(isset($error)) echo "<p class='error-text'>$error</p>"; ?>
-        <form action="register.php" method="POST">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <select name="role" required>
-                <option value="teacher">Teacher</option>
-                <option value="student">Student</option>
-            </select>
-            <button type="submit" class="btn btn-block btn-blue">Register</button>
-        </form>
-        <p class="text-center mt-20"><a href="login.php">Already have an account? Login</a></p>
-        <p class="text-center mt-20"><a href="index.html">Back to Home</a></p>
+    <div class="hero-section">
+        <div class="glass-card join-form-card">
+            <h2 style="text-align: center; margin-bottom: 30px; font-size: 2rem;">Join the Elite</h2>
+            <?php if(isset($error)) echo "<p class='error-text'>$error</p>"; ?>
+            <form action="register.php" method="POST">
+                <div class="form-group">
+                    <input type="text" name="username" class="form-control" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <select name="role" class="form-control" required style="background: rgba(255,255,255,0.05);">
+                        <option value="teacher" style="color: black;">I am a Teacher</option>
+                        <option value="student" style="color: black;">I am a Student</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" style="width: 100%;">Create Account</button>
+            </form>
+            <p style="text-align: center; margin-top: 25px; color: var(--text-dim);">Already a member? <a href="login.php" style="color: var(--accent); text-decoration: none; font-weight: 700;">Login</a></p>
+        </div>
     </div>
 </body>
 </html>

@@ -5,7 +5,13 @@ require 'config.php';
 // Handle AJAX actions
 if (isset($_GET['action'])) {
     header('Content-Type: application/json');
-    $session_id = isset($_SESSION['session_id']) ? $_SESSION['session_id'] : (isset($_SESSION['game_session_id']) ? $_SESSION['game_session_id'] : 0);
+    
+    // Determine which session ID to use based on active game role
+    if (isset($_SESSION['active_game_role']) && $_SESSION['active_game_role'] == 'teacher') {
+        $session_id = isset($_SESSION['game_session_id']) ? $_SESSION['game_session_id'] : 0;
+    } else {
+        $session_id = isset($_SESSION['session_id']) ? $_SESSION['session_id'] : 0;
+    }
     
     if ($session_id == 0) {
         echo json_encode(['error' => 'No session']);
@@ -13,7 +19,7 @@ if (isset($_GET['action'])) {
     }
 
     if ($_GET['action'] == 'get_state') {
-        $stmt = $pdo->prepare("SELECT status, current_question_id FROM game_sessions WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT gs.status, gs.current_question_id, q.game_pin FROM game_sessions gs JOIN quizzes q ON gs.quiz_id = q.id WHERE gs.id = ?");
         $stmt->execute([$session_id]);
         $session = $stmt->fetch();
         
@@ -40,6 +46,7 @@ if (isset($_GET['action'])) {
         echo json_encode([
             'status' => $session['status'],
             'current_question_id' => $session['current_question_id'],
+            'game_pin' => $session['game_pin'],
             'players' => $players,
             'question' => $question,
             'answers' => $answers
@@ -113,22 +120,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['game_pin'])) {
     $game_pin = trim($_POST['game_pin']);
     $nickname = trim($_POST['nickname']);
     
-    $stmt = $pdo->prepare("SELECT id, quiz_id FROM quizzes WHERE game_pin = ?");
+    $stmt = $pdo->prepare("SELECT id FROM quizzes WHERE game_pin = ?");
     $stmt->execute([$game_pin]);
     $quiz = $stmt->fetch();
     
     if ($quiz) {
         $stmt = $pdo->prepare("SELECT id FROM game_sessions WHERE quiz_id = ? AND status != 'finished' ORDER BY created_at DESC LIMIT 1");
-        $stmt->execute([$quiz['quiz_id']]);
+        $stmt->execute([$quiz['id']]);
         $session = $stmt->fetch();
         
         if ($session) {
             $stmt = $pdo->prepare("INSERT INTO player_scores (session_id, nickname) VALUES (?, ?)");
             $stmt->execute([$session['id'], $nickname]);
             
+            unset($_SESSION['game_session_id']); // Clear teacher session when joining as student
             $_SESSION['player_id'] = $pdo->lastInsertId();
             $_SESSION['session_id'] = $session['id'];
             $_SESSION['nickname'] = $nickname;
+            $_SESSION['active_game_role'] = 'student'; // Set active game role
             $role = 'student';
         } else {
             die("Game has not started or is finished.");
@@ -137,11 +146,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['game_pin'])) {
         die("Invalid Game PIN.");
     }
 } else if (isset($_SESSION['game_session_id']) && isset($_SESSION['role']) && $_SESSION['role'] == 'teacher') {
+    $_SESSION['active_game_role'] = 'teacher';
     $role = 'teacher';
 } else if (isset($_SESSION['session_id'])) {
+    $_SESSION['active_game_role'] = 'student';
     $role = 'student';
 } else {
-    header("Location: index.html");
+    header("Location: index.php");
     exit;
 }
 $session_val = isset($_SESSION['session_id']) ? $_SESSION['session_id'] : (isset($_SESSION['game_session_id']) ? $_SESSION['game_session_id'] : 0);
