@@ -1,5 +1,0 @@
-FROM mysql:8.0
-
-COPY database.sql /docker-entrypoint-initdb.d/01-schema.sql
-
-EXPOSE 3306
