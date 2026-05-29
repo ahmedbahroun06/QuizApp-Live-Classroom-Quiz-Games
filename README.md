@@ -5,7 +5,7 @@ Teachers create quizzes and generate game PINs. Students join instantly with no 
 
 ## Live Demo
 
-[Open QuizApp](https://8fa8fb96c4d0c0.lhr.life)
+[Open QuizApp](https://6e7326d2d047c8.lhr.life)
 
 ## Features
 
