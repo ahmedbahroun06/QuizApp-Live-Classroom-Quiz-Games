@@ -5,7 +5,8 @@ Teachers create quizzes and generate game PINs. Students join instantly with no 
 
 ## Live Demo
 
-Permanent deployment URL will be added after the Render deployment is created.
+https://app-2d8d890e-b275-4f97-a12e-6f00ad517986.cleverapps.io/
+
 
 ## Features
 
